@@ -12,14 +12,30 @@ use Slim\App;
 use Slim\Views\Twig;
 use Slim\Views\TwigExtension;
 use \App\Controllers\HomeController;
+use Illuminate\Database\Capsule\Manager;
 
 $app = new App([
 	'settings' => [
 			'displayErrorDetails' => true,
+	'db'   => [
+		'driver' => 'mysql',
+		'host' => '127.0.0.1',
+		'database' => 'webapp',
+		'username' => 'admin',
+		'password' => 'admin',
+		'charset' => 'utf8',
+		'collation' => 'utf8_unicode_ci',
+		'prefix' => '',
 		]
-	]);
+	]
+]);
 
 $container = $app->getContainer();
+
+$capsule = new Manager();
+$capsule->addConnection($container['settings']['db']);
+$capsule->setAsGlobal();
+$capsule->bootEloquent();
 
 $container['view'] = function($container){
 	$view = new Twig(INC_ROOT.'/resources/views',[
@@ -32,6 +48,10 @@ $container['view'] = function($container){
 	);
 
 	return $view;
+};
+
+$container['db'] = function($container) use ($capsule){
+	return $capsule;
 };
 
 $container['HomeController'] = function($container){
