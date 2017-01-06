@@ -1,0 +1,5 @@
+<ul class='info'>
+{% if flash.hasMessage('global') %}
+		<li>{{ flash.getMessage('global')[0]}}</li>
+{%endif%}
+</ul>
