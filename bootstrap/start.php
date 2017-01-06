@@ -13,30 +13,27 @@ use Slim\Views\Twig;
 use Slim\Views\TwigExtension;
 use \App\Controllers\HomeController;
 use Illuminate\Database\Capsule\Manager;
+use\App\Models\User;
+use Slim\Flash\Messages;
+use \App\Helpers\Hash;
 
-$app = new App([
-	'settings' => [
-			'displayErrorDetails' => true,
-	'db'   => [
-		'driver' => 'mysql',
-		'host' => '127.0.0.1',
-		'database' => 'webapp',
-		'username' => 'admin',
-		'password' => 'admin',
-		'charset' => 'utf8',
-		'collation' => 'utf8_unicode_ci',
-		'prefix' => '',
-		]
-	]
-]);
+require 'config.php';
+
+$mode = file_get_contents(INC_ROOT.'/mode.php');
+$config = config($mode);
+
+$app = new App($config);
 
 $container = $app->getContainer();
 
 $capsule = new Manager();
-$capsule->addConnection($container['settings']['db']);
+$capsule->addConnection($container->get('settings')['db']);
 $capsule->setAsGlobal();
 $capsule->bootEloquent();
 
+$container['flash'] = function($container){
+	return new Messages();
+};
 $container['view'] = function($container){
 	$view = new Twig(INC_ROOT.'/resources/views',[
 		'cache' => false,
@@ -46,12 +43,24 @@ $container['view'] = function($container){
 		$container->request->getUri()
 		)
 	);
-
+	$view->getEnvironment()->addGlobal('flash',$container['flash']);
+	$view->parserOptions = $container->get('twig')['debug'];
 	return $view;
 };
 
 $container['db'] = function($container) use ($capsule){
 	return $capsule;
+};
+
+$container['user'] = function(){
+	return new User;
+};
+
+$container['hash'] = function($container) {
+	return Hash::getInstance(
+		$container->get('app')['hash']['algo'],
+		$container->get('app')['hash']['cost']
+	);
 };
 
 $container['HomeController'] = function($container){
