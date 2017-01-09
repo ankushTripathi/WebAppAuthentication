@@ -1,4 +1,4 @@
 <?php
 
 $app->get('/','HomeController:index')->setName('home');
-$app->get('/flash','HomeController:flash');
+$app->get('/register','HomeController:register')->setName('register');
