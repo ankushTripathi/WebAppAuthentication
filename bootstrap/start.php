@@ -12,6 +12,7 @@ use Slim\App;
 use Slim\Views\Twig;
 use Slim\Views\TwigExtension;
 use \App\Controllers\HomeController;
+use \App\Controllers\AuthController;
 use Illuminate\Database\Capsule\Manager;
 use\App\Models\User;
 use Slim\Flash\Messages;
@@ -35,7 +36,7 @@ $container['flash'] = function($container){
 	return new Messages();
 };
 $container['view'] = function($container){
-	$view = new Twig(INC_ROOT.'/resources/views',[
+	$view = new Twig(INC_ROOT.'/views',[
 		'cache' => false,
 		]);
 	$view->addExtension(new TwigExtension(
@@ -65,6 +66,10 @@ $container['hash'] = function($container) {
 
 $container['HomeController'] = function($container){
 	return new HomeController($container);
+};
+
+$container['AuthController'] = function($container){
+	return new AuthController($container);
 };
 
 require INC_ROOT.'/app/routes.php';		//routes
