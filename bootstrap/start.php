@@ -17,6 +17,7 @@ use Illuminate\Database\Capsule\Manager;
 use\App\Models\User;
 use Slim\Flash\Messages;
 use \App\Helpers\Hash;
+use \App\Helpers\Validator;
 
 require 'config.php';
 
@@ -62,6 +63,10 @@ $container['hash'] = function($container) {
 		$container->get('app')['hash']['algo'],
 		$container->get('app')['hash']['cost']
 	);
+};
+
+$container['validation'] = function($container){
+	return Validator::getInstance($container->user);
 };
 
 $container['HomeController'] = function($container){

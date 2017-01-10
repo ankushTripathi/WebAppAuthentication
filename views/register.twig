@@ -2,19 +2,32 @@
 {%block title%}Register{%endblock%}
 {% block content %}
 	<link rel="stylesheet" href="{{base_url()}}/css/form.css">
-	Register
+	Register	
 	<div class="container">
-
+{% if errors %}
+<ul class = "errors">
+{% for error in errors.all() %}
+	<li>{{error}}</li>
+{%endfor%}
+{% endif %}
+</ul>
       <form class="form-signin" action="{{path_for('register.post')}}" method="post">
         <h2 class="form-signin-heading">Sign Up</h2>
+
         <label for="inputUsername" class="sr-only">User Name</label>
-        <input type="text" name="username" id="inputUsername" class="form-control" placeholder="Username" required autofocus>
+        <input type="text" name="username" id="inputUsername" 
+        {%if formdata['username'] %}value= "{{formdata['username']}}"{%endif%} 
+        class="form-control" placeholder="Username" required autofocus>
+
         <label for="inputEmail" class="sr-only">Email address</label>
-        <input type="email" name="email" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
+        <input type="email" name="email" id="inputEmail" {%if formdata['email'] %}value= "{{formdata['email']}}"{%endif%} class="form-control" placeholder="Email address" required autofocus>
+
         <label for="inputPassword" class="sr-only">Password</label>
         <input type="password" name="password" id="inputPassword" class="form-control" placeholder="Password" required>
+
      <label for="inputPassword" class="sr-only">Confirm Password</label>
         <input type="password" name="confirm_password" id="inputPassword" class="form-control" placeholder="Confirm Password" required>
+
         <button class="btn btn-lg btn-primary btn-block" type="submit">Sign Up</button>
       </form>
 
