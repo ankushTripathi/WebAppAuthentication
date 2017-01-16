@@ -15,4 +15,7 @@ class HomeController extends Controller
 	public function register(Request $req,Response $res){
 		return $this->view->render($res,'register.twig');
 	}
+	public function login(Request $req, Response $res){
+		return $this->view->render($res,'login.twig');
+	}
 }

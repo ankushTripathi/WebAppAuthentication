@@ -1,0 +1,29 @@
+{% extends 'templates/app.twig' %}
+{%block title%}Login{%endblock%}
+{% block content %}
+	<link rel="stylesheet" href="{{base_url()}}/css/form.css">
+	Login	
+	<div class="container">
+{% if errors %}
+<ul class = "errors">
+{% for error in errors.all() %}
+	<li>{{error}}</li>
+{%endfor%}
+{% endif %}
+</ul>
+      <form class="form-signin" action="{{path_for('login.post')}}" method="post">
+        <h2 class="form-signin-heading">Sign In</h2>
+
+        <label for="inputUsername" class="sr-only">User Name/Email</label>
+        <input type="text" name="identifier" id="inputUsername" 
+        {%if formdata['identifier'] %}value= "{{formdata['identifier']}}"{%endif%} 
+        class="form-control" placeholder="Username or Email" required autofocus autocomplete off >
+
+        <label for="inputPassword" class="sr-only">Password</label>
+        <input type="password" name="password" id="inputPassword" class="form-control" placeholder="Password" required>
+
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign In</button>
+      </form>
+
+    </div>
+{% endblock %}

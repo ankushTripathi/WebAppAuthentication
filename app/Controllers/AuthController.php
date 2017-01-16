@@ -44,4 +44,35 @@ class AuthController extends Controller
 		}
 
 	}
+
+	public function login(Request $req,Response $res){
+		 $formData = $req->getParsedBody();
+
+		 $identifier = $formData['identifier'];
+		 $password = $formData['password'];
+		 $validator = $this->validation;
+		 $validator->validate([
+		 	'identifier' => [$identifier,'required'],
+		 	'password' => [$password,'required']
+ 		 	]);
+		 if($validator->passes()){
+		 	$user = $this->user->where('username',$identifier)
+		 					   ->orWhere('email',$identifier)
+		 					   ->first();
+		 	if($user){
+		 		if($this->hash->checkPassword($password,$user->password))
+		 			die('pass');
+		 		else
+		 			die('fail');
+		 	}else{
+		 		die('fail');
+		 	}
+		 }else{
+		 	$this->view->render($res,'login.twig',[
+				'errors' =>$validator->errors(),
+				'formdata' => $formData
+				]);
+		 }
+
+	}
 }
