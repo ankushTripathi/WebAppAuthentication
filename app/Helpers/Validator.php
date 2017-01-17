@@ -15,10 +15,13 @@ class Validator extends Violin
 		$this->user = $user;
 		$this->addFieldMessages([
 			'email' => [
-					'uniqueEmail' => 'that email is already in use.'
+					'uniqueEmail' => 'that email is already in use. Sign in or did u forget password'
 					],
 			'username' => [
-					'uniqueUsername' => 'that username is taken.'
+					'uniqueUsername' => 'that username is taken. choose another'
+				],
+			'identifier' => [
+					'exists' => 'invalid username/email or password!'
 				]
 			]);
 	}
@@ -36,5 +39,8 @@ class Validator extends Violin
 	}
 	public function validate_uniqueUsername($value,$input,$args){
 		return !(bool) $this->user->where('username',$value)->count();
+	}
+	public function validate_exists($value,$input,$args){
+		return (bool) $this->user->where('username',$value)->orWhere('email',$value)->count();
 	}
 }

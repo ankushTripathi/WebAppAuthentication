@@ -1,5 +1,9 @@
 {% extends 'templates/app.twig' %}
 {%block title%}Home{%endblock%}
 {% block content %}
+	{% if authUser %}
+		Hey {{authUser.displayName()}}!
+	{% else %}
 	Hey Homie!
+	{% endif %}
 {% endblock %}

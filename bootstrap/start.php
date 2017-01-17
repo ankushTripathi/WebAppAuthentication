@@ -18,6 +18,7 @@ use\App\Models\User;
 use Slim\Flash\Messages;
 use \App\Helpers\Hash;
 use \App\Helpers\Validator;
+use \App\Middleware\Auth;
 
 require 'config.php';
 
@@ -32,6 +33,10 @@ $capsule = new Manager();
 $capsule->addConnection($container->get('settings')['db']);
 $capsule->setAsGlobal();
 $capsule->bootEloquent();
+
+$container['authUser'] = function(){
+	return false;
+};
 
 $container['flash'] = function($container){
 	return new Messages();
@@ -76,5 +81,7 @@ $container['HomeController'] = function($container){
 $container['AuthController'] = function($container){
 	return new AuthController($container);
 };
+
+$app->add('Auth:isAuthenticated');
 
 require INC_ROOT.'/app/routes.php';		//routes

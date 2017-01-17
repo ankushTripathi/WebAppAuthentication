@@ -17,5 +17,11 @@ class User extends Model
 		'remember_identifier',
 		'remember_token'
 	];
-
+	public function displayName(){
+		if($this->first_name && $this->last_name){
+			return "{$this->first_name} {$this->last_name}";
+		}
+		else
+			return $this->username;
+	}
 }

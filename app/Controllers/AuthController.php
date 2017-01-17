@@ -52,21 +52,22 @@ class AuthController extends Controller
 		 $password = $formData['password'];
 		 $validator = $this->validation;
 		 $validator->validate([
-		 	'identifier' => [$identifier,'required'],
+		 	'identifier' => [$identifier,'required|exists'],
 		 	'password' => [$password,'required']
  		 	]);
 		 if($validator->passes()){
 		 	$user = $this->user->where('username',$identifier)
 		 					   ->orWhere('email',$identifier)
 		 					   ->first();
-		 	if($user){
-		 		if($this->hash->checkPassword($password,$user->password))
-		 			die('pass');
-		 		else
-		 			die('fail');
-		 	}else{
-		 		die('fail');
-		 	}
+		 		if($this->hash->checkPassword($password,$user->password)){
+		 			$_SESSION[$this->auth['session']] = $user->id;
+		 			$this->flash->addMessage('global','you have been logged in');
+		 			return $res->withStatus(302)->withHeader('Location',$this->router->pathFor('home'));
+		 		}else
+		 			$this->view->render($res,'login.twig',[
+					'errors' =>'invalid username/email or password!',
+					'formdata' => $formData
+					]);
 		 }else{
 		 	$this->view->render($res,'login.twig',[
 				'errors' =>$validator->errors(),
