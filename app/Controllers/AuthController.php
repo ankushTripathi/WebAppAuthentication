@@ -9,6 +9,15 @@ use Psr\Http\Message\ResponseInterface as Response;
 class AuthController extends Controller
 {
 
+	public function isAuthenticated($request,$response,$next){
+	if(isset($_SESSION[$this->auth['session']])){
+		$this->authUser =  $this->user->where('id',$_SESSION[$this->auth['session']])->first();
+		$this->view->offsetSet('authUser',$this->authUser);
+	}
+	$response = $next($request, $response);
+	return $response;
+	}
+
 	public function register(Request $req,Response $res){
 		$formData = $req->getParsedBody();
 

@@ -82,6 +82,5 @@ $container['AuthController'] = function($container){
 	return new AuthController($container);
 };
 
-$app->add('Auth:isAuthenticated');
-
+$app->add('AuthController:isAuthenticated');
 require INC_ROOT.'/app/routes.php';		//routes
