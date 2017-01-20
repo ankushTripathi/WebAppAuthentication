@@ -8,11 +8,21 @@ use Psr\Http\Message\ResponseInterface as Response;
 
 class AuthController extends Controller
 {
+	protected $checkroute = array('login','register','login.post','register.post');
+	protected $authroute = array('logout','changepassword','profile');
 
 	public function isAuthenticated($request,$response,$next){
+
 	if(isset($_SESSION[$this->auth['session']])){
 		$this->authUser =  $this->user->where('id',$_SESSION[$this->auth['session']])->first();
 		$this->view->offsetSet('authUser',$this->authUser);
+		
+		$route = $request->getAttribute('route');
+		$routeName = $route->getName();
+		if(in_array($routeName, $this->checkroute)){
+			$this->flash->addMessage('global','you are already logged in!');
+			return $response->withHeader('Location',$this->router->pathFor('home'));
+		}
 	}
 	$response = $next($request, $response);
 	return $response;
@@ -84,5 +94,13 @@ class AuthController extends Controller
 				]);
 		 }
 
+	}
+
+	public function logout(Request $req,Response $res){
+		if(isset($_SESSION[$this->auth['session']])){
+			unset($_SESSION[$this->auth['session']]);
+			$this->flash->addMessage('global','you have been logged out');
+		 	return $res->withStatus(302)->withHeader('Location',$this->router->pathFor('home'));
+		}
 	}
 }

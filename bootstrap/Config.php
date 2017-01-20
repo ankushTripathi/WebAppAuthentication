@@ -5,6 +5,7 @@ function config($mode){
 
 			'settings' => [
 				'displayErrorDetails' => true,
+				'determineRouteBeforeAppMiddleware' => true,
 
 			'db'   => [
 				'driver' => 'mysql',
@@ -58,7 +59,8 @@ function config($mode){
 			'algo' => PASSWORD_BCRYPT,
 			'cost' => 10,
 		],
-		'displayErrorDetails' => false
+		'displayErrorDetails' => false,
+		'determineRouteBeforeAppMiddleware' => true
 	],
 
 	'db'   => [
