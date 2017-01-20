@@ -3,7 +3,7 @@ function config($mode){
 	if($mode === 'development'){
 		return [
 
-			'settings' => [
+		'settings' => [
 				'displayErrorDetails' => true,
 				'determineRouteBeforeAppMiddleware' => true,
 
@@ -16,8 +16,7 @@ function config($mode){
 				'charset' => 'utf8',
 				'collation' => 'utf8_unicode_ci',
 				'prefix' => '',
-				]
-			],
+				],
 			'app' => [
 				'url' => 'http://localhost',
 				'hash' => [
@@ -35,8 +34,8 @@ function config($mode){
 				'smtp_auth' => true,
 				'smtp_secure' => 'tls',
 				'host' => 'smtp.gmail.com',
-				'username' => 'your_email_id',
-				'password' => 'your_password',
+				'username' => '***REMOVED***',
+				'password' => '***REMOVED***',
 				'port' => 587,
 				'html' => true
 			],
@@ -48,7 +47,8 @@ function config($mode){
 			'csrf' => [
 				'session' => 'csrf_token'
 			]
-		];
+		]
+	];
 	}
 	else if($mode === 'production'){
 		return [

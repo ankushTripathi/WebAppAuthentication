@@ -29,4 +29,12 @@ class Hash
 		return password_verify($password,$hash);
 	}
 
+	public function hash($input){
+		return hash('sha256',$input);
+	}
+
+	public function hashCheck($hash,$input){
+		return hash_equals($hash,$input);
+	}
+
 }

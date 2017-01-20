@@ -18,7 +18,8 @@ use\App\Models\User;
 use Slim\Flash\Messages;
 use \App\Helpers\Hash;
 use \App\Helpers\Validator;
-use \App\Middleware\Auth;
+use \App\Helpers\Mailer;
+use RandomLib\Factory as RandomLib;
 
 require 'config.php';
 
@@ -51,7 +52,7 @@ $container['view'] = function($container){
 		)
 	);
 	$view->getEnvironment()->addGlobal('flash',$container['flash']);
-	$view->parserOptions = $container->get('twig')['debug'];
+	$view->parserOptions = $container->get('settings')['twig']['debug'];
 	return $view;
 };
 
@@ -65,14 +66,39 @@ $container['user'] = function(){
 
 $container['hash'] = function($container) {
 	return Hash::getInstance(
-		$container->get('app')['hash']['algo'],
-		$container->get('app')['hash']['cost']
+		$container->get('settings')['app']['hash']['algo'],
+		$container->get('settings')['app']['hash']['cost']
 	);
 };
 
 $container['validation'] = function($container){
 	return Validator::getInstance($container->user);
 };
+
+ $container['mailer'] = function($container){
+ 	$mailer = new PHPMailer;
+
+ 	$mailSettings = $container->get('settings')['mail'];
+
+ 	$mailer->IsSMTP();
+ 	$mailer->SMTPDebug = 2;
+ 	$mailer->Host = $mailSettings['host'];
+ 	$mailer->SMTPAuth = $mailSettings['smtp_auth'];
+ 	$mailer->SMTPSecure = $mailSettings['smtp_secure'];
+ 	$mailer->Port = $mailSettings['port'];
+ 	$mailer->Username = $mailSettings['username'];
+ 	$mailer->Password = $mailSettings['password'];
+ 	$mailer->isHTML($mailSettings['html']);
+
+ 	return Mailer::getInstance($mailer,$container->view);
+ };
+
+ $container['randomlib'] = function($secureInstance){
+
+ 		$factory = new RandomLib;
+ 		return $factory->getMediumStrengthGenerator();
+ };
+
 
 $container['HomeController'] = function($container){
 	return new HomeController($container);
@@ -83,4 +109,5 @@ $container['AuthController'] = function($container){
 };
 
 $app->add('AuthController:isAuthenticated');
-require INC_ROOT.'/app/routes.php';		//routes
+
+require 'routes.php';		//routes

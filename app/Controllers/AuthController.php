@@ -13,8 +13,8 @@ class AuthController extends Controller
 
 	public function isAuthenticated($request,$response,$next){
 
-	if(isset($_SESSION[$this->auth['session']])){
-		$this->authUser =  $this->user->where('id',$_SESSION[$this->auth['session']])->first();
+	if(isset($_SESSION[$this->settings['auth']['session']])){
+		$this->authUser =  $this->user->where('id',$_SESSION[$this->settings['auth']['session']])->first();
 		$this->view->offsetSet('authUser',$this->authUser);
 		
 		$route = $request->getAttribute('route');
@@ -46,13 +46,29 @@ class AuthController extends Controller
 
 		if($validator->passes()){
 
+			$activeString = $this->randomlib->generateString(128);
+
 			$user = $this->user->create([
 				'username' => $formData['username'],
 				'email' => $formData['email'],
-				'password' => $this->hash->createPassword($formData['password'])
+				'password' => $this->hash->createPassword($formData['password']),
+				'active' => false,
+				'active_hash' => $this->hash->hash($activeString)
 			]);
 
-		$this->flash->addMessage('global','you have been registered');
+			$this->mailer->send([
+				'to' => $user->email,
+				'subject' =>'Thank you for registering'
+				],
+				'templates/email/register.twig',
+					[
+					'user' => $user,
+					'activeString' => $activeString,
+					'baseUrl' => $this->settings['app']['url']
+					]
+				);
+
+		$this->flash->addMessage('global','You have been registered!');
 		return $res->withStatus(302)->withHeader('location',$this->router->pathFor('home'));
 		}
 		else{
@@ -62,6 +78,28 @@ class AuthController extends Controller
 				]);
 		}
 
+	}
+
+	public function activate(Request $req,Response $res){
+		
+		$args = $req->getQueryParams();
+		$email = $args['email'];
+		$identifier = $args['identifier'];
+
+		$hashedIdentifer = $this->hash->hash($identifier);
+		
+		$user = $this->user->where('email',$email)
+						   ->where('active',false)->first();
+		
+		if(!user || !$this->hash->hashCheck($user->active_hash,$hashedIdentifer)){
+			$this->flash->addMessage('global','could not activate account. try again');
+			return $res->withHeader('Location',$this->router->pathFor('home'));
+		}
+		else{
+			$user->activate();
+			$this->flash->addMessage('global','account activated, sign in now!');
+			return $res->withHeader('Location',$this->router->pathFor('login'));
+		}
 	}
 
 	public function login(Request $req,Response $res){
@@ -75,11 +113,12 @@ class AuthController extends Controller
 		 	'password' => [$password,'required']
  		 	]);
 		 if($validator->passes()){
-		 	$user = $this->user->where('username',$identifier)
-		 					   ->orWhere('email',$identifier)
+		 	$user = $this->user->where([['username',$identifier],['active',true]])
+		 					   ->orWhere([['email',$identifier],['active',true]])
 		 					   ->first();
-		 		if($this->hash->checkPassword($password,$user->password)){
-		 			$_SESSION[$this->auth['session']] = $user->id;
+
+		 		if($user && $this->hash->checkPassword($password,$user->password)){
+		 			$_SESSION[$this->settings['auth']['session']] = $user->id;
 		 			$this->flash->addMessage('global','you have been logged in');
 		 			return $res->withStatus(302)->withHeader('Location',$this->router->pathFor('home'));
 		 		}else
@@ -97,8 +136,8 @@ class AuthController extends Controller
 	}
 
 	public function logout(Request $req,Response $res){
-		if(isset($_SESSION[$this->auth['session']])){
-			unset($_SESSION[$this->auth['session']]);
+		if(isset($_SESSION[$this->settings['auth']['session']])){
+			unset($_SESSION[$this->settings['auth']['session']]);
 			$this->flash->addMessage('global','you have been logged out');
 		 	return $res->withStatus(302)->withHeader('Location',$this->router->pathFor('home'));
 		}

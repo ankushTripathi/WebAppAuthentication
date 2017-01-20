@@ -24,4 +24,12 @@ class User extends Model
 		else
 			return $this->username;
 	}
+	public function activate(){
+		if(!$this->active){
+			$this->update([
+				'active' => true,
+				'active_hash' => null
+				]);
+		}
+	}
 }
