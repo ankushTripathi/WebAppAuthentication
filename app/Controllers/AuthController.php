@@ -8,7 +8,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 
 class AuthController extends Controller
 {
-	protected $checkroute = array('login','register','login.post','register.post');
+	protected $checkroute = array('login','register','login.post','register.post','activate');
 	protected $authroute = array('logout','changepassword','profile');
 
 	public function isAuthenticated($request,$response,$next){

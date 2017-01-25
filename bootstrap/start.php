@@ -20,6 +20,7 @@ use \App\Helpers\Hash;
 use \App\Helpers\Validator;
 use \App\Helpers\Mailer;
 use RandomLib\Factory as RandomLib;
+use \App\Helpers\CSRFMiddleware as CSRF;
 
 require 'config.php';
 
@@ -99,6 +100,9 @@ $container['validation'] = function($container){
  		return $factory->getMediumStrengthGenerator();
  };
 
+$container['CSRFprotect'] = function($container){
+		return new CSRF($container);
+} ;
 
 $container['HomeController'] = function($container){
 	return new HomeController($container);
