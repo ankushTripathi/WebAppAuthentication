@@ -24,7 +24,7 @@ class Mailer
 
 		$this->mailer->from = '***REMOVED***'; 
 		$this->mailer->addAddress($mailHeader['to']);
-		$this->mailer->Subject = $mailHeader['Subject'];
+		$this->mailer->Subject = $mailHeader['subject'];
 		$this->mailer->Body = $this->view->fetch($template,$data);
 
 		$this->mailer->send();
