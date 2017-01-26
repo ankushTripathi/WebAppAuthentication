@@ -34,8 +34,8 @@ function config($mode){
 				'smtp_auth' => true,
 				'smtp_secure' => 'tls',
 				'host' => 'smtp.gmail.com',
-				'username' => '',
-				'password' => '',
+				'username' => '**REMOVED**',
+				'password' => '**REMOVED**',
 				'port' => 587,
 				'html' => true
 			],
