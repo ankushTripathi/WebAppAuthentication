@@ -8,8 +8,9 @@ use Psr\Http\Message\ResponseInterface as Response;
 
 class AuthController extends Controller
 {
-	protected $checkroute = array('login','register','login.post','register.post','activate','forgotpassword','forgotpassword.post');
-	protected $authroute = array('logout','profile');
+	protected $checkroute = array('login','register','login.post','register.post',
+		'activate','forgotpassword','forgotpassword.post');
+	protected $authroute = array('logout','profile','changepassword','changepassword.post');
 
 	public function isAuthenticated($request,$response,$next){
 		
@@ -188,9 +189,11 @@ class AuthController extends Controller
 		$user = $this->user->where('email',$email)->first();
 		if($user){
 		
-			$recoverString = $this->randomlib->generateString(128); 
-			$recoverHash = $this->hash->hash($recoverString);		
-			$user->recover($recoverHash);
+			$recoverString = $this->randomlib->generateString(128);		
+			$user->update([
+				'active' => false,
+				'recover_hash' => $this->hash->hash($recoverString)
+				]);
 			$this->mailer->send([
 			'to' => $user->email,
 			'subject' => 'Recover Password'
@@ -214,4 +217,48 @@ class AuthController extends Controller
 		}
 	}
 
+	public function recover(Request $req,Response $res){
+		$args = $req->getQueryParams();
+		$email = $args['email'];
+		$identifier = $args['identifier'];
+		$hashedIdentifer = $this->hash->hash($identifier);
+		$user = $this->user->where([['email',$email],['active',false]])->first();
+		if(!$user || !$this->hash->hashCheck($user->recover_hash,$hashedIdentifer)){
+			$this->flash->addMessage('global','problem occured.. try again..');
+			return $res->withStatus(302)->withHeader('Location',$this->router->pathFor('home'));
+		}
+		else{
+			$_SESSION[$this->settings['auth']['session']] = $user->id;
+			$user->recover();
+			$this->flash->addMessage('global','reset you password here!');
+			return $res->withStatus(302)->withHeader('Location',$this->router->pathFor('changepassword'));
+		}
+
+	}
+	public function changepassword(Request $req,Response $res){
+		$formData = $req->getParsedBody();
+		$password = $formData['password'];
+		$confirmPassword = $formData['confirm_password'];
+
+		$validator = $this->validation;
+		$validator->validate([
+			'password' => [$password,'required|min(8)'],
+			'confirm_password' => [$confirmPassword,'required|matches(password)']
+			]);
+		if($validator->passes()){
+			$this->authUser->update([
+				'password' => $this->hash->createPassword($password)
+				]);
+			$this->flash->addMessage('global','password changed');
+			unset($_SESSION[$this->settings['auth']['session']]);
+			if($_COOKIE[$this->settings['auth']['remember']])
+				setcookie($this->settings['auth']['remember'],null,time()-100);
+			return $res->withStatus(302)->withHeader('Location',$this->router->pathFor('login'));
+		}else{
+		 	$this->view->render($res,'changepassword.twig',[
+				'errors' =>$validator->errors(),
+				'formdata' => $formData
+				]);			
+		}
+	}
 }

@@ -33,10 +33,10 @@ class User extends Model
 				]);
 		}
 	}
-	public function recover($recoverHash){
+	public function recover(){
 		$this->update([
-			'active' => false,
-			'recover_hash' => $recoverHash 
+			'active' => true,
+			'recover_hash' => null
 			]);
 	}
 }
