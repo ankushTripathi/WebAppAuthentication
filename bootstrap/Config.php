@@ -26,16 +26,16 @@ function config($mode){
 			],
 
 			'auth' => [
-				'session' => 'user_id',
-				'remember' => 'user_r'
+				'session' => 'a2v_wu_cc',
+				'remember' => 'vxc_dsd_dw'
 			],
 
 			'mail' => [
 				'smtp_auth' => true,
 				'smtp_secure' => 'tls',
 				'host' => 'smtp.gmail.com',
-				'username' => '**REMOVED**',
-				'password' => '**REMOVED**',
+				'username' => '',
+				'password' => '',
 				'port' => 587,
 				'html' => true
 			],
