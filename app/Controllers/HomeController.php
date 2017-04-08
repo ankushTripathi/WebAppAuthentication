@@ -21,4 +21,7 @@ class HomeController extends Controller
 	public function forgotpassword(Request $req,Response $res){
 		return $this->view->render($res,'forgotpassword.twig');
 	}
+	public function changepassword(Request $req,Response $res){
+		return $this->view->render($res,'changepassword.twig');
+	}
 }

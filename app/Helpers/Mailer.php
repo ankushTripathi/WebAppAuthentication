@@ -22,7 +22,7 @@ class Mailer
 
 	public function send($mailHeader,$template,$data){
 
-		$this->mailer->from = ''; 
+		$this->mailer->from = 'qchtcfribfsmwnmb'; 
 		$this->mailer->addAddress($mailHeader['to']);
 		$this->mailer->Subject = $mailHeader['subject'];
 		$this->mailer->Body = $this->view->fetch($template,$data);
