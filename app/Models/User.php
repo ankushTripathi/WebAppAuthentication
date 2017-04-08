@@ -14,6 +14,7 @@ class User extends Model
 		'password',
 		'active',
 		'active_hash',
+		'recover_hash',
 		'remember_identifier',
 		'remember_token'
 	];
@@ -31,5 +32,11 @@ class User extends Model
 				'active_hash' => null
 				]);
 		}
+	}
+	public function recover($recoverHash){
+		$this->update([
+			'active' => false,
+			'recover_hash' => $recoverHash 
+			]);
 	}
 }

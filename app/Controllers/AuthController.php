@@ -8,11 +8,26 @@ use Psr\Http\Message\ResponseInterface as Response;
 
 class AuthController extends Controller
 {
-	protected $checkroute = array('login','register','login.post','register.post','activate');
-	protected $authroute = array('logout','changepassword','profile');
+	protected $checkroute = array('login','register','login.post','register.post','activate','forgotpassword','forgotpassword.post');
+	protected $authroute = array('logout','profile');
 
 	public function isAuthenticated($request,$response,$next){
+		
+		if(isset($_COOKIE[$this->settings['auth']['remember']])){
+			$cookie_val = $_COOKIE[$this->settings['auth']['remember']];
+			$hash_cookie_val = $this->hash->hash($cookie_val);
+			$user = $this->user->where('remember_identifier',$cookie_val)->first();
+			if(!$user || !$this->hash->hashCheck($user->remember_token,$hash_cookie_val)){
+				$this->flash->addMessage('global','problem signing in');
+				if($request->getAttribute('route')->getName() === 'home')
+					return $this->view->render($res,'home.twig');
+				else
+					return $response->withHeader('Location',$this->router->pathFor('home'));
+			}
+			else
+				$_SESSION[$this->settings['auth']['session']] = $user->id;
 
+		}
 	if(isset($_SESSION[$this->settings['auth']['session']])){
 		$this->authUser =  $this->user->where('id',$_SESSION[$this->settings['auth']['session']])->first();
 		$this->view->offsetSet('authUser',$this->authUser);
@@ -103,10 +118,12 @@ class AuthController extends Controller
 	}
 
 	public function login(Request $req,Response $res){
+
 		 $formData = $req->getParsedBody();
 
 		 $identifier = $formData['identifier'];
 		 $password = $formData['password'];
+		 $remember = (!empty($formData['remember'])? : false);
 		 $validator = $this->validation;
 		 $validator->validate([
 		 	'identifier' => [$identifier,'required|exists'],
@@ -118,6 +135,17 @@ class AuthController extends Controller
 		 					   ->first();
 
 		 		if($user && $this->hash->checkPassword($password,$user->password)){
+		 			if($remember){
+		 				unset($_COOKIE[$this->settings['auth']['remember']]);
+		 				$randomString = $this->randomlib->generateString(128);
+		 				$rememberToken = $this->hash->hash($randomString);
+		 				setcookie($this->settings['auth']['remember'],$randomString,time()+604800,'/','/',true,true);
+		 				$rUser = $this->user->where('id',$user->id)->first();
+		 				$rUser->update([
+		 					'remember_identifier' => $randomString,
+		 					'remember_token' => $rememberToken
+		 					]);
+		 			}
 		 			$_SESSION[$this->settings['auth']['session']] = $user->id;
 		 			$this->flash->addMessage('global','you have been logged in');
 		 			return $res->withStatus(302)->withHeader('Location',$this->router->pathFor('home'));
@@ -137,9 +165,53 @@ class AuthController extends Controller
 
 	public function logout(Request $req,Response $res){
 		if(isset($_SESSION[$this->settings['auth']['session']])){
+			$this->authUser->update([
+				'remember_identifier' => null,
+				'remember_token' => null
+				]);
 			unset($_SESSION[$this->settings['auth']['session']]);
+			setcookie($this->settings['auth']['remember'],null,time()-100);
 			$this->flash->addMessage('global','you have been logged out');
 		 	return $res->withStatus(302)->withHeader('Location',$this->router->pathFor('home'));
 		}
 	}
+
+		public function forgotpassword(Request $req,Response $res){
+		$formData = $req->getParsedBody();
+		$email = $formData['email'];
+		$validator = $this->validation;
+		$validator->validate([
+			'email' => [$email,'required|email|exists']
+			]);
+		if($validator->passes()){
+
+		$user = $this->user->where('email',$email)->first();
+		if($user){
+		
+			$recoverString = $this->randomlib->generateString(128); 
+			$recoverHash = $this->hash->hash($recoverString);		
+			$user->recover($recoverHash);
+			$this->mailer->send([
+			'to' => $user->email,
+			'subject' => 'Recover Password'
+			],
+			'templates/email/recoverpassword.twig',
+			[
+				'user' => $user,
+				'recoverString' => $recoverString,
+				'baseUrl' => $this->settings['app']['url']
+			]
+		);
+		$this->flash->addMessage('global','request accepted! check your mail for further steps');
+		return $res->withStatus(302)->withHeader('Location',$this->router->pathFor('home'));
+		}
+		
+		}else{
+			$this->view->render($res,'forgotpassword.twig',[
+				'errors' =>$validator->errors(),
+				'formdata' => $formData
+				]);
+		}
+	}
+
 }

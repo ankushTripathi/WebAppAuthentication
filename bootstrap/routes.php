@@ -7,3 +7,6 @@ $app->get('/login','HomeController:login')->add('CSRFprotect:generate')->setName
 $app->post('/login','AuthController:login')->add('CSRFprotect:check')->setName('login.post');
 $app->get('/logout','AuthController:logout')->setName('logout');
 $app->get('/activate','AuthController:activate')->setName('activate');
+$app->get('/recover','AuthController:recover')->setName('recover');
+$app->get('/forgotpassword','HomeController:forgotpassword')->setName('forgotpassword');
+$app->post('/forgotpassword','AuthController:forgotpassword')->setName('forgotpassword.post');

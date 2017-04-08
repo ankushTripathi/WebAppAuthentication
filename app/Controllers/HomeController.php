@@ -18,4 +18,7 @@ class HomeController extends Controller
 	public function login(Request $req, Response $res){
 		return $this->view->render($res,'login.twig');
 	}
+	public function forgotpassword(Request $req,Response $res){
+		return $this->view->render($res,'forgotpassword.twig');
+	}
 }

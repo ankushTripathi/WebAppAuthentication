@@ -24,9 +24,12 @@
 
         <label for="inputPassword" class="sr-only">Password</label>
         <input type="password" name="password" id="inputPassword" class="form-control" placeholder="Password" required>
+        <input type = "checkbox" name = "remember"/>    Remember Me
         <input type = "hidden" name = "{{csrf_key}}" value="{{csrf_value}}">
         <button class="btn btn-lg btn-primary btn-block" type="submit">Sign In</button>
+        <a href="{{path_for('forgotpassword')}}">Forgot Password?</a>
       </form>
+
 
     </div>
 {% endblock %}
